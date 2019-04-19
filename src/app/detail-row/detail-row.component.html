@@ -1,0 +1,113 @@
+<h1 >Kendo tabela</h1>
+<div *ngFor="let parrent of parrents | async"></div> <!-- za ucitavanje iz firebase parrents -->
+<div *ngFor="let children of childrens | async"></div> <!-- za ucitavanje iz firebase childrens -->
+
+  <kendo-grid 
+  #tabela
+  [data]="roditelji" 
+  [height]="400" 
+  (edit)="editHandler($event)" 
+  (cancel)="cancelHandler($event)"
+  (save)="saveHandler($event)" 
+  (remove)="removeHandler($event)"
+  (add)="addHandler($event)"
+  (dataStateChange)="dataStateChange($event)">
+    <ng-template kendoGridToolbarTemplate>
+      <button kendoGridAddCommand>Dodaj novi</button>
+    </ng-template>
+      <kendo-grid-column field="ime" title="Ime" width="150"></kendo-grid-column>
+      <kendo-grid-column field="prezime" title="Prezime" width="150"></kendo-grid-column>
+       <kendo-grid-column field="children" title="Children" width="150">
+        <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.children.length}}</ng-template>
+        <ng-template kendoGridEditTemplate 
+          let-dataItem="dataItem"
+          let-formGroup="formGroup">
+          <kendo-multiselect 
+            [data]="deca" 
+            [textField]="'ime'"
+            [textField]="'prezime'"
+            [valueField]="'godinaRodjenja'"
+            [textField]="'mestoRodjenja'"
+            [valueField]="'id'"
+            [formControl]="formGroup.get('children')">
+          </kendo-multiselect>
+        </ng-template>
+      </kendo-grid-column>
+      <kendo-grid-command-column title="command" width="220">
+        <ng-template kendoGridCellTemplate let-isNew="isNew">
+            <button kendoGridEditCommand [primary]="true">Edituj</button>
+            <button kendoGridRemoveCommand>Izbrisi</button>
+            <button kendoGridSaveCommand [disabled]="formGroup?.invalid">{{ isNew ? 'Add' : 'Update' }}</button>
+            <button kendoGridCancelCommand>{{ isNew ? 'Discard changes' : 'Cancel' }}</button>
+        </ng-template>
+      </kendo-grid-command-column>
+      <ng-template kendoGridDetailTemplate let-dataItem>
+        <kendo-grid [data]="dataItem.children"></kendo-grid>
+      </ng-template>
+  </kendo-grid>
+
+  <!-- button za modal za dodavanje children-a -->
+  <button id="dodajChildren" class="btn btn-primary" type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalAddChildren" (click)="nuliranjePoljaUModalu()">
+    Add children
+  </button>
+
+  <!-- modal za dodavanje children-a -->
+  <div class="modal" id="modalAddChildren">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Add children</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form name="form" (ngSubmit)="fAdd.form.valid && addNewChild(ime.value, prezime.value, godinaRodjenja.value, mestoRodjenja.value, opis.value)" #fAdd="ngForm" novalidate>
+            <div class="form-group">
+              <label for="ime">Ime: </label>
+              <input type="text" class="form-control" [(ngModel)]="model.ime" id="ime" #ime="ngModel" [ngClass]="{'is-invalid':fAdd.submitted && ime.invalid}" name="ime" autofocus required>
+              <div class="invalid-feedback">
+                <div>Ime je obavezno</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="prezime">Prezime: </label>
+              <input type="text" class="form-control" id="prezime" [(ngModel)]="model.prezime" #prezime="ngModel" [ngClass]="{'is-invalid':fAdd.submitted && prezime.invalid}" name="prezime" required>
+              <div class="invalid-feedback">
+                <div>Prezime je obavezno</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="godinaRodjenja">Godina rodjenja: </label>
+              <input type="number" class="form-control" id="godinaRodjenja" 
+              [(ngModel)]="model.godinaRodjenja"  
+              #godinaRodjenja="ngModel" 
+              [ngClass]="{'is-invalid':fAdd.submitted && godinaRodjenja.invalid}" 
+              name="godinaRodjenja"
+               min='1900' 
+               max='{{currentYear}}' 
+               required>
+              <div class="invalid-feedback">
+                <div>Godina rođenja je obavezno uneti ispravno</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="mestoRodjenja">Mesto rodjenja: </label>
+              <input type="text" class="form-control" id="mestoRodjenja" [(ngModel)]="model.mestoRodjenja" #mestoRodjenja="ngModel" [ngClass]="{'is-invalid':fAdd.submitted && mestoRodjenja.invalid}" name="mestoRodjenja" required>
+              <div class="invalid-feedback">
+                <div>Mesto rođenja je obavezno</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="opis">Opis:</label>
+              <textarea class="form-control" rows="5" id="opis" #opis name="opis"></textarea>
+            </div>
+            <div class="form-group">
+              <button class="btn btn-primary" [disabled]="fAdd.invalid">Add new child</button>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal" #close>Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
