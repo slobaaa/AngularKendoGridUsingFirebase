@@ -1,4 +1,6 @@
-# KendoProba
+# KENDO UI - CRUD from firebase and show them in then Kedno Grid
+Login system from Firebase
+USING KENDO UI for Angular Component
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.3.7.
 
